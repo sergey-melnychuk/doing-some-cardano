@@ -20,3 +20,7 @@ cat account_0_public_root_key.txt | ./cardano-address key child 0/0 > key_for_ac
 cat key_for_account_0_address_0.txt | ./cardano-address address payment --network-tag 1 > pay_to_account_0_address_0.txt
 
 addr1v8fet8gavr6elqt6q50skkjf025zthqu6vr56l5k39sp9aqlvz2g4
+
+---
+
+TODO: https://developers.cardano.org/docs/get-started/create-simple-transaction
