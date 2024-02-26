@@ -1,5 +1,7 @@
 use blockfrost::{BlockFrostSettings, BlockfrostAPI, BlockfrostResult};
-use pallas::ledger::addresses::{Network, ShelleyAddress, ShelleyDelegationPart, ShelleyPaymentPart};
+use pallas::ledger::addresses::{
+    Network, ShelleyAddress, ShelleyDelegationPart, ShelleyPaymentPart,
+};
 use pallas::ledger::primitives::Fragment;
 use pallas::txbuilder::BuildBabbage;
 use pallas::{
@@ -7,8 +9,8 @@ use pallas::{
     ledger::{
         addresses::Address,
         primitives::{
-            babbage::{PseudoTx, TransactionBody, WitnessSet},
             babbage::AuxiliaryData,
+            babbage::{PseudoTx, TransactionBody, WitnessSet},
         },
     },
     txbuilder::{Input, Output, StagingTransaction},
@@ -27,10 +29,14 @@ async fn main() -> BlockfrostResult<()> {
         println!("{tx:#?}");
     }*/
 
-    let key: [u8; 32] = hex::decode("12a5a0c0ba39796d92653e3eccf5d9e254728d4226f31fbe6785cf02bbb28f97").unwrap().try_into().unwrap();
+    let key: [u8; 32] =
+        hex::decode("12a5a0c0ba39796d92653e3eccf5d9e254728d4226f31fbe6785cf02bbb28f97")
+            .unwrap()
+            .try_into()
+            .unwrap();
     let sk: SecretKey = key.into();
     let pk = sk.public_key();
-    println!("SK: {}", hex::encode(&key));
+    println!("SK: {}", hex::encode(key));
     println!("PK: {pk}");
 
     let tx_hash = "d4a8a8ad0ecea56a9dc61fa586d77c9a22df288b421a04b48a4ec329b5e2e363";
@@ -40,8 +46,8 @@ async fn main() -> BlockfrostResult<()> {
     let addr = hex::decode(addr).unwrap();
     let addr = Hash::new(addr[..28].try_into().unwrap());
     let addr = Address::Shelley(ShelleyAddress::new(
-        Network::Mainnet, 
-        ShelleyPaymentPart::key_hash(addr), 
+        Network::Mainnet,
+        ShelleyPaymentPart::key_hash(addr),
         ShelleyDelegationPart::Null,
     ));
 
@@ -60,70 +66,70 @@ async fn main() -> BlockfrostResult<()> {
     let api = build_api()?;
     match api.transactions_submit(tx.tx_bytes.as_ref().to_vec()).await {
         Ok(ret) => println!("\n{ret}"),
-        Err(e) => println!("\n{e:?}")
+        Err(e) => println!("\n{e:?}"),
     }
 
-/* 
+    /*
 
-ERROR:
+    ERROR:
 
-transaction submit error ShelleyTxValidationError 
+    transaction submit error ShelleyTxValidationError
 
-ShelleyBasedEraBabbage (
-    ApplyTxError [
-        UtxowFailure (
-            FromAlonzoUtxowFail (
-                WrappedShelleyEraFailure (
-                    MissingVKeyWitnessesUTXOW (
-                        WitHashes (
-                            fromList [
-                                KeyHash \\\"6bd1eb00955b7f021d0c80ebd1506bccf8d271f0bcd815135c305a8f\\\"
-                            ]
+    ShelleyBasedEraBabbage (
+        ApplyTxError [
+            UtxowFailure (
+                FromAlonzoUtxowFail (
+                    WrappedShelleyEraFailure (
+                        MissingVKeyWitnessesUTXOW (
+                            WitHashes (
+                                fromList [
+                                    KeyHash \\\"6bd1eb00955b7f021d0c80ebd1506bccf8d271f0bcd815135c305a8f\\\"
+                                ]
+                            )
                         )
                     )
+                )
+            ),
+            UtxowFailure (
+                UtxoFailure (
+                    BabbageOutputTooSmallUTxO [
+                        (
+                            (Addr Mainnet (
+                                KeyHashObj (
+                                    KeyHash \\\"ea6f779b7d8936574419052439fc2e9bf7fdfd7307d8e187aa02da82\\\"
+                                )
+                            ) StakeRefNull,
+                            Value 42 (fromList []),
+                            NoDatum,
+                            SNothing
+                        ),
+                        Coin 844760
+                    ]
                 )
             )
         ),
         UtxowFailure (
             UtxoFailure (
-                BabbageOutputTooSmallUTxO [
-                    (
-                        (Addr Mainnet (
-                            KeyHashObj (
-                                KeyHash \\\"ea6f779b7d8936574419052439fc2e9bf7fdfd7307d8e187aa02da82\\\"
-                            )
-                        ) StakeRefNull,
-                        Value 42 (fromList []),
-                        NoDatum,
-                        SNothing
-                    ),
-                    Coin 844760
-                ]
+                FromAlonzoUtxoFail (
+                    ValueNotConservedUTxO (
+                        Value 3993249 (
+                            fromList []
+                        )
+                    ) (Value 42 (fromList []))
+                )
+            )
+        ),
+        UtxowFailure (
+            UtxoFailure (
+                FromAlonzoUtxoFail (
+                    FeeTooSmallUTxO (Coin 163521) (Coin 0)
+                )
             )
         )
-    ),
-    UtxowFailure (
-        UtxoFailure (
-            FromAlonzoUtxoFail (
-                ValueNotConservedUTxO (
-                    Value 3993249 (
-                        fromList []
-                    )
-                ) (Value 42 (fromList []))
-            )
-        )
-    ),
-    UtxowFailure (
-        UtxoFailure (
-            FromAlonzoUtxoFail (
-                FeeTooSmallUTxO (Coin 163521) (Coin 0)
-            )
-        )
+    ]
     )
-]
-)
 
-*/
+    */
 
     Ok(())
 }
