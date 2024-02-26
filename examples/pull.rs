@@ -17,6 +17,7 @@ async fn main() -> BlockfrostResult<()> {
     let block = api.blocks_latest().await?;
     println!("block: {} (latest)", block.height.unwrap_or_default());
 
+    // https://beta.explorer.cardano.org/en/transaction/d4a8a8ad0ecea56a9dc61fa586d77c9a22df288b421a04b48a4ec329b5e2e363/summary
     let block = api.blocks_by_id("9970549").await?;
     println!("block: {}", block.height.unwrap_or_default());
     let txs = api.blocks_txs(&block.hash, Pagination::all()).await?;
