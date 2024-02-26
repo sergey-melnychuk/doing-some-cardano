@@ -6,17 +6,19 @@ fn build_api() -> BlockfrostResult<BlockfrostAPI> {
     Ok(api)
 }
 
-// https://github.com/blockfrost/blockfrost-rust/blob/v1.0.1/examples/fetch_all.rs
-
+// Scan block of transactions for Tx outputs to a given address.
 #[tokio::main]
 async fn main() -> BlockfrostResult<()> {
+    // https://github.com/blockfrost/blockfrost-rust/blob/v1.0.1/examples/fetch_all.rs
     let api = build_api()?;
 
     let address = "addr1q94ar6cqj4dh7qsapjqwh52sd0x035n37z7ds9gntsc94rl7x4sv002yhxau33ujw232gzlwre6jac2ny9ywj93942eqx2sjuc";
 
-    // let block = api.blocks_latest().await?;
-    // println!("block: {}", block.height.unwrap_or_default());
+    let block = api.blocks_latest().await?;
+    println!("block: {} (latest)", block.height.unwrap_or_default());
+
     let block = api.blocks_by_id("9970549").await?;
+    println!("block: {}", block.height.unwrap_or_default());
     let txs = api.blocks_txs(&block.hash, Pagination::all()).await?;
     for hash in txs {
         let tx = api.transaction_by_hash(&hash).await?;
