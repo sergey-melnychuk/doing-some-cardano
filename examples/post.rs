@@ -1,10 +1,11 @@
 use blockfrost::{BlockFrostSettings, BlockfrostAPI, BlockfrostResult};
+use pallas::ledger::addresses::{Network, ShelleyAddress, ShelleyDelegationPart, ShelleyPaymentPart};
 use pallas::ledger::primitives::Fragment;
 use pallas::txbuilder::BuildBabbage;
 use pallas::{
     crypto::{hash::Hash, key::ed25519::SecretKey},
     ledger::{
-        addresses::{Address, ByronAddress},
+        addresses::Address,
         primitives::{
             babbage::{PseudoTx, TransactionBody, WitnessSet},
             babbage::AuxiliaryData,
@@ -15,8 +16,6 @@ use pallas::{
 };
 
 pub type Tx = PseudoTx<TransactionBody, WitnessSet, AuxiliaryData>;
-
-const CRC: crc::Crc<u32> = crc::Crc::<u32>::new(&crc::CRC_32_ISO_HDLC);
 
 // Build and sent a Tx to Cardano mainnet.
 #[tokio::main]
@@ -38,9 +37,13 @@ async fn main() -> BlockfrostResult<()> {
     let tx_hash = Hash::new(hex::decode(tx_hash).unwrap().try_into().unwrap());
 
     let addr = "ea6f779b7d8936574419052439fc2e9bf7fdfd7307d8e187aa02da8252f6fad6";
-    let addr: [u8; 32] = hex::decode(&addr).unwrap().try_into().unwrap();
-    let addr = ByronAddress::new(&addr[..28], CRC.checksum(&addr[..28]));
-    let addr = Address::Byron(addr);
+    let addr = hex::decode(addr).unwrap();
+    let addr = Hash::new(addr[..28].try_into().unwrap());
+    let addr = Address::Shelley(ShelleyAddress::new(
+        Network::Mainnet, 
+        ShelleyPaymentPart::key_hash(addr), 
+        ShelleyDelegationPart::Null,
+    ));
 
     let tx = StagingTransaction::new()
         .input(Input::new(tx_hash, 7))
@@ -61,126 +64,64 @@ async fn main() -> BlockfrostResult<()> {
     }
 
 /* 
-OUTPUT:
-
-SK: 12a5a0c0ba39796d92653e3eccf5d9e254728d4226f31fbe6785cf02bbb28f97
-PK: c460713b1792057c1b5245ca3e4aab7191598d51fbb269007bc1f5abfa0f245a
-
-{
-  "version": "v1",
-  "era": "babbage",
-  "status": "built",
-  "tx_hash": "4f49f3c15b94be003fa28f712aa2ed25c04dfcce4caba4a894c14b9fba147c52",
-  "tx_bytes": "84a30081825820d4a8a8ad0ecea56a9dc61fa586d77c9a22df288b421a04b48a4ec329b5e2e363070181a200582682d818581cea6f779b7d8936574419052439fc2e9bf7fdfd7307d8e187aa02da821acc314d8f01182a0200a10081825820c460713b1792057c1b5245ca3e4aab7191598d51fbb269007bc1f5abfa0f245a5840624afdce81363b89724bad7a56589040f114585e22a19a480c183e7824cbbfd88083867118fd2537d195d528009d130ceb7e0eb477cdb57f6e76947b04470f0df5f6",
-  "signatures": {
-    "c460713b1792057c1b5245ca3e4aab7191598d51fbb269007bc1f5abfa0f245a": "624afdce81363b89724bad7a56589040f114585e22a19a480c183e7824cbbfd88083867118fd2537d195d528009d130ceb7e0eb477cdb57f6e76947b04470f0d"
-  }
-}
-
-PseudoTx {
-    transaction_body: PseudoTransactionBody {
-        inputs: [
-            TransactionInput {
-                transaction_id: Hash<32>(
-                    "d4a8a8ad0ecea56a9dc61fa586d77c9a22df288b421a04b48a4ec329b5e2e363",
-                ),
-                index: 7,
-            },
-        ],
-        outputs: [
-            PostAlonzo(
-                PseudoPostAlonzoTransactionOutput {
-                    address: Bytes(
-                        ByteVec(
-                            [<snip>],
-                        ),
-                    ),
-                    value: Coin(
-                        42,
-                    ),
-                    datum_option: None,
-                    script_ref: None,
-                },
-            ),
-        ],
-        fee: 0,
-        ttl: None,
-        certificates: None,
-        withdrawals: None,
-        update: None,
-        auxiliary_data_hash: None,
-        validity_interval_start: None,
-        mint: None,
-        script_data_hash: None,
-        collateral: None,
-        required_signers: None,
-        network_id: None,
-        collateral_return: None,
-        total_collateral: None,
-        reference_inputs: None,
-    },
-    transaction_witness_set: WitnessSet {
-        vkeywitness: Some(
-            [
-                VKeyWitness {
-                    vkey: Bytes(
-                        ByteVec(
-                            [<snip>],
-                        ),
-                    ),
-                    signature: Bytes(
-                        ByteVec(
-                            [<snip>],
-                        ),
-                    ),
-                },
-            ],
-        ),
-        native_script: None,
-        bootstrap_witness: None,
-        plutus_v1_script: None,
-        plutus_data: None,
-        redeemer: None,
-        plutus_v2_script: None,
-    },
-    success: true,
-    auxiliary_data: Null,
-}
-
----
 
 ERROR:
 
-transaction read error RawCborDecodeError [
-    DecoderErrorDeserialiseFailure "Byron Tx" (
-        DeserialiseFailure 1 "Size mismatch when decoding TxAux. Expected 2, but found 4."
+transaction submit error ShelleyTxValidationError 
+
+ShelleyBasedEraBabbage (
+    ApplyTxError [
+        UtxowFailure (
+            FromAlonzoUtxowFail (
+                WrappedShelleyEraFailure (
+                    MissingVKeyWitnessesUTXOW (
+                        WitHashes (
+                            fromList [
+                                KeyHash \\\"6bd1eb00955b7f021d0c80ebd1506bccf8d271f0bcd815135c305a8f\\\"
+                            ]
+                        )
+                    )
+                )
+            )
+        ),
+        UtxowFailure (
+            UtxoFailure (
+                BabbageOutputTooSmallUTxO [
+                    (
+                        (Addr Mainnet (
+                            KeyHashObj (
+                                KeyHash \\\"ea6f779b7d8936574419052439fc2e9bf7fdfd7307d8e187aa02da82\\\"
+                            )
+                        ) StakeRefNull,
+                        Value 42 (fromList []),
+                        NoDatum,
+                        SNothing
+                    ),
+                    Coin 844760
+                ]
+            )
+        )
     ),
-    DecoderErrorDeserialiseFailure "Shelley Tx" (
-        DeserialiseFailure 1 "Size mismatch when decoding Record RecD. Expected 4, but found 3."
+    UtxowFailure (
+        UtxoFailure (
+            FromAlonzoUtxoFail (
+                ValueNotConservedUTxO (
+                    Value 3993249 (
+                        fromList []
+                    )
+                ) (Value 42 (fromList []))
+            )
+        )
     ),
-    DecoderErrorDeserialiseFailure "Shelley Tx" (
-        DeserialiseFailure 1 "Size mismatch when decoding Record RecD. Expected 4, but found 3."
-    ),
-    DecoderErrorDeserialiseFailure "Shelley Tx" (
-        DeserialiseFailure 1 "Size mismatch when decoding Record RecD. Expected 4, but found 3."
-    ),
-    DecoderErrorDeserialiseFailure "Shelley Tx" (
-        DeserialiseFailure 42 "expected list len or indef"
-    ),
-    DecoderErrorDeserialiseFailure "Shelley Tx" (
-        DeserialiseFailure 84 "DecoderErrorDeserialiseFailure "Address" (
-            DeserialiseFailure 38 "Deserialisation failure while decoding (
-                (AbstractHash Blake2b_224 Address'),
-                (Attributes AddrAttributes),
-                AddrType
-            ).
-            CBOR failed with error: DeserialiseFailure 0 "expected list len"
-        )"
+    UtxowFailure (
+        UtxoFailure (
+            FromAlonzoUtxoFail (
+                FeeTooSmallUTxO (Coin 163521) (Coin 0)
+            )
+        )
     )
 ]
-
-Seems relevant:
-https://github.com/IntersectMBO/cardano-node/issues/3972
+)
 
 */
 

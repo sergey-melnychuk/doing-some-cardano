@@ -477,7 +477,6 @@ name = "doing-some-cardano-with-rust"
 version = "0.1.0"
 dependencies = [
  "blockfrost",
- "crc",
  "hex",
  "pallas",
  "serde",

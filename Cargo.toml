@@ -11,5 +11,4 @@ tokio = { version = "1.36.0", features = ["full"] }
 
 blockfrost = "1.0.1"
 
-crc = "3.0.1"
 pallas = { version = "0.22.0", features = ["unstable"] }
