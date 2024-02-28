@@ -5,7 +5,10 @@ use pallas::ledger::addresses::{
 use pallas::ledger::primitives::Fragment;
 use pallas::txbuilder::BuildBabbage;
 use pallas::{
-    crypto::{hash::Hash, key::ed25519::SecretKey},
+    crypto::{
+        hash::{Hash, Hasher},
+        key::ed25519::SecretKeyExtended,
+    },
     ledger::{
         addresses::Address,
         primitives::{
@@ -29,34 +32,37 @@ async fn main() -> BlockfrostResult<()> {
         println!("{tx:#?}");
     }*/
 
-    let key: [u8; 32] =
-        hex::decode("12a5a0c0ba39796d92653e3eccf5d9e254728d4226f31fbe6785cf02bbb28f97")
+    // TODO: make sure the tx is signed with the key that matches the key-hash from the error message
+    // TODO: (the key hash must match "0c7d816776c89c63eb1b290063cd33d378bc273954490b51ea742c31")
+    let key: [u8; 64] =
+        hex::decode("801c54f28d09538f0c00b678dd52147793ff8bc18e705c8d4c467555cf123e5d57deca236482df886ce86413bad744b015aa1cb94e4a9bd21ef927ddbe0d8768")
             .unwrap()
             .try_into()
             .unwrap();
-    let sk: SecretKey = key.into();
+    let sk: SecretKeyExtended = key.into();
     let pk = sk.public_key();
     println!("SK: {}", hex::encode(key));
     println!("PK: {pk}");
 
-    let tx_hash = "d4a8a8ad0ecea56a9dc61fa586d77c9a22df288b421a04b48a4ec329b5e2e363";
+    let tx_hash = "846bbc78e51c785f2e8c2a4c141068d7bf84556d350456af159f4ccf5668b3e5";
     let tx_hash = Hash::new(hex::decode(tx_hash).unwrap().try_into().unwrap());
 
-    let addr = "ea6f779b7d8936574419052439fc2e9bf7fdfd7307d8e187aa02da8252f6fad6";
+    let addr = "12a605ef43e7a5abd2644be6b126f237c5a8b5736dabd66ced624b7f823175e6";
     let addr = hex::decode(addr).unwrap();
-    let addr = Hash::new(addr[..28].try_into().unwrap());
+    let hash = Hasher::<224>::hash(&addr);
     let addr = Address::Shelley(ShelleyAddress::new(
-        Network::Mainnet,
-        ShelleyPaymentPart::key_hash(addr),
+        Network::Testnet,
+        ShelleyPaymentPart::key_hash(hash),
         ShelleyDelegationPart::Null,
     ));
 
     let tx = StagingTransaction::new()
-        .input(Input::new(tx_hash, 7))
-        .output(Output::new(addr, 42))
+        .input(Input::new(tx_hash, 0))
+        .output(Output::new(addr, 9_999_000_000))
+        .fee(1_000_000)
         .build_babbage_raw()
         .unwrap()
-        .sign(PrivateKey::Normal(sk))
+        .sign(PrivateKey::Extended(sk))
         .unwrap();
     println!("\n{}", serde_json::to_string_pretty(&tx).unwrap());
 
@@ -70,11 +76,9 @@ async fn main() -> BlockfrostResult<()> {
     }
 
     /*
-
     ERROR:
 
     transaction submit error ShelleyTxValidationError
-
     ShelleyBasedEraBabbage (
         ApplyTxError [
             UtxowFailure (
@@ -83,50 +87,14 @@ async fn main() -> BlockfrostResult<()> {
                         MissingVKeyWitnessesUTXOW (
                             WitHashes (
                                 fromList [
-                                    KeyHash \\\"6bd1eb00955b7f021d0c80ebd1506bccf8d271f0bcd815135c305a8f\\\"
+                                    KeyHash "0c7d816776c89c63eb1b290063cd33d378bc273954490b51ea742c31"
                                 ]
                             )
                         )
                     )
                 )
-            ),
-            UtxowFailure (
-                UtxoFailure (
-                    BabbageOutputTooSmallUTxO [
-                        (
-                            (Addr Mainnet (
-                                KeyHashObj (
-                                    KeyHash \\\"ea6f779b7d8936574419052439fc2e9bf7fdfd7307d8e187aa02da82\\\"
-                                )
-                            ) StakeRefNull,
-                            Value 42 (fromList []),
-                            NoDatum,
-                            SNothing
-                        ),
-                        Coin 844760
-                    ]
-                )
             )
-        ),
-        UtxowFailure (
-            UtxoFailure (
-                FromAlonzoUtxoFail (
-                    ValueNotConservedUTxO (
-                        Value 3993249 (
-                            fromList []
-                        )
-                    ) (Value 42 (fromList []))
-                )
-            )
-        ),
-        UtxowFailure (
-            UtxoFailure (
-                FromAlonzoUtxoFail (
-                    FeeTooSmallUTxO (Coin 163521) (Coin 0)
-                )
-            )
-        )
-    ]
+        ]
     )
 
     */
@@ -137,6 +105,7 @@ async fn main() -> BlockfrostResult<()> {
 #[allow(unused)]
 fn build_api() -> BlockfrostResult<BlockfrostAPI> {
     let settings = BlockFrostSettings::new();
-    let api = BlockfrostAPI::new("mainnetxvMK4xOpp5mHJgihi055KDLU64JJv2be", settings);
+    // let api = BlockfrostAPI::new("mainnetxvMK4xOpp5mHJgihi055KDLU64JJv2be", settings);
+    let api = BlockfrostAPI::new("preprododflHjPhpRp4NzRFL1m9zzd6ZJb1RjYi", settings);
     Ok(api)
 }
