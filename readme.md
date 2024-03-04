@@ -1,5 +1,6 @@
 https://github.com/uniVocity/cardano-tutorials/blob/master/cardano-addresses.md
 
+```
 wget https://github.com/cardano-foundation/cardano-wallet/releases/download/v2023-12-18/cardano-wallet-v2023-12-18-linux64.tar.gz
 
 tar -xvf cardano-wallet-v2023-12-18-linux64.tar.gz
@@ -20,9 +21,11 @@ cat account_0_public_root_key.txt | ./cardano-address key child 0/0 > key_for_ac
 cat key_for_account_0_address_0.txt | ./cardano-address address payment --network-tag 1 > pay_to_account_0_address_0.txt
 
 addr1v8fet8gavr6elqt6q50skkjf025zthqu6vr56l5k39sp9aqlvz2g4
+```
 
 ---
 
+```
 cat key_for_account_0_address_0.txt | ./cardano-address address payment --network-tag 0 > test.addr
 
 cat test.addr
@@ -39,6 +42,7 @@ cat test.addr | ./cardano-address address inspect
 }
 
 PreProd faucet Tx hash: 846bbc78e51c785f2e8c2a4c141068d7bf84556d350456af159f4ccf5668b3e5
+```
 
 ---
 
