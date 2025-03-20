@@ -1,12 +1,5 @@
 use blockfrost::{BlockFrostSettings, BlockfrostAPI, BlockfrostResult, Pagination};
 
-fn build_api() -> BlockfrostResult<BlockfrostAPI> {
-    let settings = BlockFrostSettings::new();
-    // let api = BlockfrostAPI::new("mainnetxvMK4xOpp5mHJgihi055KDLU64JJv2be", settings);
-    let api = BlockfrostAPI::new("preprododflHjPhpRp4NzRFL1m9zzd6ZJb1RjYi", settings);
-    Ok(api)
-}
-
 // Scan block of transactions for Tx outputs to a given address.
 #[tokio::main]
 async fn main() -> BlockfrostResult<()> {
@@ -48,4 +41,11 @@ async fn main() -> BlockfrostResult<()> {
     println!("UTXOs: {utxos:#?}");
 
     Ok(())
+}
+
+fn build_api() -> BlockfrostResult<BlockfrostAPI> {
+    let settings = BlockFrostSettings::new();
+    // let api = BlockfrostAPI::new("mainnetxvMK4xOpp5mHJgihi055KDLU64JJv2be", settings);
+    let api = BlockfrostAPI::new("preprododflHjPhpRp4NzRFL1m9zzd6ZJb1RjYi", settings);
+    Ok(api)
 }
