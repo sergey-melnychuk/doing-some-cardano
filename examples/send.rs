@@ -41,7 +41,7 @@ async fn main() -> BlockfrostResult<()> {
         ShelleyDelegationPart::Null,
     ));
 
-    // Preprod Faucet TX
+    // Preprod Faucet TX (https://docs.cardano.org/cardano-testnets/tools/faucet)
     let tx_hash = "41ad304e0826489399c220046239b8e19971f956ec35d1020b78a46067bc61b3";
     let tx_hash = Hash::new(hex::decode(tx_hash).unwrap().try_into().unwrap());
 
