@@ -32,29 +32,25 @@ async fn main() -> BlockfrostResult<()> {
         println!("{tx:#?}");
     }*/
 
-    // TODO: make sure the tx is signed with the key that matches the key-hash from the error message
-    // TODO: (the key hash must match "0c7d816776c89c63eb1b290063cd33d378bc273954490b51ea742c31")
     let key: [u8; 64] =
-        hex::decode("801c54f28d09538f0c00b678dd52147793ff8bc18e705c8d4c467555cf123e5d57deca236482df886ce86413bad744b015aa1cb94e4a9bd21ef927ddbe0d8768")
+        hex::decode("88d92bbcc81bfe08a9ef02d9a23dca9a59873bc636ec78a70c95d9bf7ca7de5e9df4e7d8bbac69ff0816a385b289493b5bc3e0f9d046fa91c3288f16f4d8bcf0")
             .unwrap()
             .try_into()
             .unwrap();
     let sk: SecretKeyExtended = key.into();
     let pk = sk.public_key();
     println!("SK: {}", hex::encode(key));
-    println!("PK: {pk}");
+    let hash = Hasher::<224>::hash(&pk.as_ref());
+    println!("PK: {pk} | {hash}");
 
-    let tx_hash = "846bbc78e51c785f2e8c2a4c141068d7bf84556d350456af159f4ccf5668b3e5";
-    let tx_hash = Hash::new(hex::decode(tx_hash).unwrap().try_into().unwrap());
-
-    let addr = "12a605ef43e7a5abd2644be6b126f237c5a8b5736dabd66ced624b7f823175e6";
-    let addr = hex::decode(addr).unwrap();
-    let hash = Hasher::<224>::hash(&addr);
     let addr = Address::Shelley(ShelleyAddress::new(
         Network::Testnet,
         ShelleyPaymentPart::key_hash(hash),
         ShelleyDelegationPart::Null,
     ));
+
+    let tx_hash = "846bbc78e51c785f2e8c2a4c141068d7bf84556d350456af159f4ccf5668b3e5";
+    let tx_hash = Hash::new(hex::decode(tx_hash).unwrap().try_into().unwrap());
 
     let tx = StagingTransaction::new()
         .input(Input::new(tx_hash, 0))

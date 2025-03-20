@@ -40,5 +40,12 @@ async fn main() -> BlockfrostResult<()> {
         }
     }
 
+    let tx = api.transaction_by_hash("846bbc78e51c785f2e8c2a4c141068d7bf84556d350456af159f4ccf5668b3e5").await?;
+    println!("TX: {tx:#?}");
+    let utxos = api
+        .transactions_utxos(&tx.hash)
+        .await?;
+    println!("UTXOs: {utxos:#?}");
+
     Ok(())
 }
