@@ -3,7 +3,7 @@ name = "doing-some-cardano-with-rust"
 version = "0.1.0"
 edition = "2021"
 
-[dependencies]
+[dev-dependencies]
 hex = "0.4.3"
 serde = "1.0.197"
 serde_json = "1.0.114"
