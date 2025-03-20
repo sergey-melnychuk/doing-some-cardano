@@ -1,20 +1,18 @@
 use blockfrost::{BlockFrostSettings, BlockfrostAPI, BlockfrostResult, Pagination};
 
-// Scan block of transactions for Tx outputs to a given address.
 #[tokio::main]
 async fn main() -> BlockfrostResult<()> {
-    // https://github.com/blockfrost/blockfrost-rust/blob/v1.0.1/examples/fetch_all.rs
     let api = build_api()?;
 
-    let address = "addr_test1vqx8mqt8wmyfccltrv5sqc7dx0fh30p8892yjz63af6zcvgszmek6";
-
+    // https://preprod.cardanoscan.io/address/addr_test1vp4ar6cqj4dh7qsapjqwh52sd0x035n37z7ds9gntsc94rcdr8ark
+    let address = "addr_test1vp4ar6cqj4dh7qsapjqwh52sd0x035n37z7ds9gntsc94rcdr8ark";
     let utxos = api.addresses_utxos(address, Pagination::all()).await?;
     println!("{utxos:#?}");
 
     let block = api.blocks_latest().await?;
     println!("block: {} (latest)", block.height.unwrap_or_default());
     let block = api
-        .blocks_by_id("8c20a129c5e033d2f2f44199928c84c716317fb63e13cc2ad2e8db410265530c")
+        .blocks_by_id("8df5934b603291ad30f906eec3bcbc8d88855c2fe4736805f2619fbfed67a4e4")
         .await?;
     println!("block: {}", block.height.unwrap_or_default());
     let txs = api.blocks_txs(&block.hash, Pagination::all()).await?;
@@ -32,14 +30,7 @@ async fn main() -> BlockfrostResult<()> {
             println!("{utxos:#?}");
         }
     }
-
-    let tx = api.transaction_by_hash("846bbc78e51c785f2e8c2a4c141068d7bf84556d350456af159f4ccf5668b3e5").await?;
-    println!("TX: {tx:#?}");
-    let utxos = api
-        .transactions_utxos(&tx.hash)
-        .await?;
-    println!("UTXOs: {utxos:#?}");
-
+    
     Ok(())
 }
 

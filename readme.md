@@ -39,7 +39,15 @@ cat account_0_key_path.txt | cardano-address key public --with-chain-code > acco
 
 cat account_0_public_root_key.txt | cardano-address key child 0/0 > key_for_account_0_address_0.txt
 
-cat key_for_account_0_address_0.txt | cardano-address address payment --network-tag testnet
+cat key_for_account_0_address_0.txt | cardano-address address payment --network-tag testnet > addr0.txt
+
+cat addr0.txt
+addr_test1vp4ar6cqj4dh7qsapjqwh52sd0x035n37z7ds9gntsc94rcdr8ark
+
+cat key_for_account_0_address_1.txt | cardano-address address payment --network-tag testnet > addr1.txt
+
+cat addr1.txt
+addr_test1vzlj767yytyslms8p2dxug04tq5n48usac38z4xkdt5nzagxzueyq
 
 cardano-cli address key-hash --payment-verification-key-file key_for_account_0_address_0.txt 
 6bd1eb00955b7f021d0c80ebd1506bccf8d271f0bcd815135c305a8f
